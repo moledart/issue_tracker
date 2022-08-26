@@ -1,5 +1,7 @@
-import IssuesList from "../components/IssuesList";
-import LabelList from "../components/LabelList";
+import React from 'react';
+import IssuesList from '../components/IssuesList';
+import LabelList from '../components/LabelList';
+
 export default function Issues() {
   return (
     <div>
