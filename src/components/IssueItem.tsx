@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { GoIssueOpened, GoIssueClosed, GoComment } from 'react-icons/go';
 import { relativeDate } from '../helpers/relativeDate';
+import { useUserData } from '../helpers/useUserData';
 
 interface IssueItemProps {
   assignee: string;
@@ -26,6 +27,8 @@ export function IssueItem({
   labels,
   status,
 }: IssueItemProps) {
+  const assigneeUser = useUserData(assignee);
+  const createdByUser = useUserData(createdBy);
   return (
     <li>
       <div>
@@ -45,10 +48,17 @@ export function IssueItem({
           ))}
         </span>
         <small>
-          #{number} opened {relativeDate(createdDate)} by {createdBy}
+          #{number} opened {relativeDate(createdDate)}{' '}
+          {createdByUser.isSuccess ? `by ${createdByUser.data.name}` : null}
         </small>
       </div>
-      {assignee ? <div>{assignee}</div> : null}
+      {assigneeUser.isSuccess ? (
+        <img
+          src={assigneeUser.data.profilePictureUrl}
+          className="assigned-to"
+          alt={`Assigned to ${assigneeUser.data.name}`}
+        />
+      ) : null}
       <span className="comment-count">
         {comments.length > 0 ? (
           <>
