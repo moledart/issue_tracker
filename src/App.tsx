@@ -3,6 +3,7 @@ import Issues from './pages/Issues';
 import Issue from './pages/Issue';
 import AddIssue from './pages/AddIssue';
 import React from 'react';
+import FetchingIndicator from './components/FetchingIndicator';
 
 function App() {
   const isRootPath = useMatch({ path: '/', end: true });
@@ -19,6 +20,7 @@ function App() {
         <Route path="/add" element={<AddIssue />} />
         <Route path="/issue/:number" element={<Issue />} />
       </Routes>
+      <FetchingIndicator />
     </div>
   );
 }

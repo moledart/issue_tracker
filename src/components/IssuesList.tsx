@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useIsFetching } from '@tanstack/react-query';
 import { IssueItem } from './IssueItem';
+import fetchWithError from '../helpers/fetchWithError';
+import Loader from './Loader';
 
 export default function IssuesList({
   labels,
@@ -10,18 +12,20 @@ export default function IssuesList({
   status: string;
 }) {
   const [searchValue, setSearchValue] = useState('');
-  const issuesQuery = useQuery(['issues', { labels, status }], () => {
+  const issuesQuery = useQuery(['issues', { labels, status }], ({ signal }) => {
     const statusString = status ? `&status=${status}` : '';
     const labelsString = labels.map((label) => `labels[]=${label}`).join('&');
-    return fetch(`/api/issues?${labelsString}${statusString}`).then((res) =>
-      res.json()
-    );
+    return fetchWithError(`/api/issues?${labelsString}${statusString}`, {
+      signal,
+    });
   });
 
   const searchQuery = useQuery(
     ['issues', 'search', searchValue],
-    () =>
-      fetch(`/api/search/issues?q=${searchValue}`).then((res) => res.json()),
+    ({ signal }) =>
+      fetch(`/api/search/issues?q=${searchValue}`, { signal }).then((res) =>
+        res.json()
+      ),
     {
       enabled: searchValue.length > 0,
     }
@@ -48,9 +52,11 @@ export default function IssuesList({
           }}
         />
       </form>
-      <h2>Issues List</h2>
+      <h2>Issues List {issuesQuery.isFetching ? <Loader /> : null}</h2>
       {issuesQuery.isLoading ? (
         <p>Loading...</p>
+      ) : issuesQuery.isError && issuesQuery.error instanceof Error ? (
+        <p>{issuesQuery.error.message}</p>
       ) : searchQuery.fetchStatus === 'idle' && searchQuery.isLoading ? (
         <ul className="issues-list">
           {issuesQuery.data.map((issue) => (
