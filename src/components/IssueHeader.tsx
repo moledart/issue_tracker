@@ -42,7 +42,7 @@ export const IssueHeader = ({
           {statusObject?.label}
         </span>
         <span className="created-by">
-          {createdUser.isLoading ? '...' : createdUser.data?.name}
+          {createdUser?.isLoading ? '...' : createdUser?.data?.name}
         </span>{' '}
         opened this issue {relativeDate(createdDate)} | {comments.length}{' '}
         comments

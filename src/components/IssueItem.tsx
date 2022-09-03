@@ -4,6 +4,8 @@ import { GoIssueOpened, GoIssueClosed, GoComment } from 'react-icons/go';
 import { relativeDate } from '../helpers/relativeDate';
 import { useUserData } from '../helpers/useUserData';
 import { Label } from './Label';
+import { useQueryClient } from '@tanstack/react-query';
+import fetchWithError from '../helpers/fetchWithError';
 
 interface IssueItemProps {
   assignee: string;
@@ -30,8 +32,19 @@ export function IssueItem({
 }: IssueItemProps) {
   const assigneeUser = useUserData(assignee);
   const createdByUser = useUserData(createdBy);
+  const queryClient = useQueryClient();
   return (
-    <li>
+    <li
+      onMouseEnter={() => {
+        queryClient.prefetchQuery(['issues', number.toString()], () =>
+          fetchWithError(`/api/issues/${number}`)
+        );
+        queryClient.prefetchQuery(
+          ['issues', number.toString(), 'comments'],
+          () => fetchWithError(`/api/issues/${number}/comments`)
+        );
+      }}
+    >
       <div>
         {status === 'done' || status === 'closed' ? (
           <GoIssueClosed style={{ color: 'red' }} />
@@ -48,10 +61,10 @@ export function IssueItem({
         </span>
         <small>
           #{number} opened {relativeDate(createdDate)}{' '}
-          {createdByUser.isSuccess ? `by ${createdByUser.data.name}` : null}
+          {createdByUser?.isSuccess ? `by ${createdByUser.data.name}` : null}
         </small>
       </div>
-      {assignee && assigneeUser.isSuccess ? (
+      {assignee && assigneeUser?.isSuccess ? (
         <img
           src={assigneeUser.data.profilePictureUrl}
           className="assigned-to"
